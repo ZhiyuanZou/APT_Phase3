@@ -38,6 +38,7 @@
     <string name="configuration_error">Error: the value of WEB_CLIENT_ID or SERVER_BASE_URL is not  set correctly. This will cause errors when requesting a server auth code.</string>
     <string name="title_activity_view_astream">ViewAStreamActivity</string>
     <string name="title_activity_take_photo">TakePhotoActivity</string>
+    <string name="title_activity_view_nearby">ViewNearbyActivity</string>
 
 
 </resources>

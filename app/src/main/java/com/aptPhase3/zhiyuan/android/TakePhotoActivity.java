@@ -110,8 +110,8 @@ public class TakePhotoActivity extends ActionBarActivity implements SurfaceHolde
         if(mLastLocation!=null){
             String lat = ((Double)mLastLocation.getLatitude()).toString();
             String lon = ((Double)mLastLocation.getLongitude()).toString();
-            request_url += "?latitude=" + lat;
-            request_url += "?longitude=" + lon;
+            request_url += "&latitude=" + lat;
+            request_url += "&longitude=" + lon;
         }else{
             Toast.makeText(context, "Failed to retrieve location", Toast.LENGTH_SHORT).show();
         }

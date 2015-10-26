@@ -82,6 +82,7 @@ public class Homepage extends ActionBarActivity implements
     private SignInButton mSignInButton;
     private Button mSignOutButton;
     private Button mRevokeButton;
+    private Button mViewNearby;
     private TextView mStatus;
 
     // application
@@ -99,6 +100,8 @@ public class Homepage extends ActionBarActivity implements
         mSignOutButton = (Button) findViewById(R.id.sign_out_button);
         mRevokeButton = (Button) findViewById(R.id.revoke_access_button);
         mStatus = (TextView) findViewById(R.id.sign_in_status);
+        mViewNearby = (Button) findViewById(R.id.View_Nearby);
+        mViewNearby.setClickable(false);
 
         setGooglePlusButtonText(mSignInButton, "Sign in          ");
 
@@ -211,6 +214,10 @@ public class Homepage extends ActionBarActivity implements
                     Toast.makeText(getApplicationContext(), "You've just revoked Connexus to access your basic account info.", Toast.LENGTH_LONG).show();
                     login_msg_shown = false;
                     break;
+                case R.id.View_Nearby:
+                    Intent intent = new Intent(context, ViewNearbyActivity.class);
+                    startActivity(intent);
+                    break;
             }
         }
     }
@@ -234,6 +241,9 @@ public class Homepage extends ActionBarActivity implements
         mSignInButton.setEnabled(false);
         mSignOutButton.setEnabled(true);
         mRevokeButton.setEnabled(true);
+        mViewNearby.setClickable(true);
+        mViewNearby.setOnClickListener(this);
+        mViewNearby.setEnabled(true);
 
         // Retrieve some profile information to personalize our app for the user.
         final Person currentUser = Plus.PeopleApi.getCurrentPerson(myApp.mGoogleApiClient);
@@ -247,18 +257,18 @@ public class Homepage extends ActionBarActivity implements
 
         mStatus.setText(email + " is currently Signed In");
 
-        Button uploadButton = (Button) findViewById(R.id.open_image_upload_page);
-        uploadButton.setClickable(true);
-
-        uploadButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent= new Intent(context, ImageUpload.class);
-                        startActivity(intent);
-                    }
-                }
-        );
+//        Button uploadButton = (Button) findViewById(R.id.open_image_upload_page);
+//        uploadButton.setClickable(true);
+//
+//        uploadButton.setOnClickListener(
+//                new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        Intent intent= new Intent(context, ImageUpload.class);
+//                        startActivity(intent);
+//                    }
+//                }
+//        );
     }
 
     /* onConnectionFailed is called when our Activity could not connect to Google
@@ -363,10 +373,9 @@ public class Homepage extends ActionBarActivity implements
         mSignInButton.setEnabled(true);
         mSignOutButton.setEnabled(false);
         mRevokeButton.setEnabled(false);
-
+        mViewNearby.setEnabled(false);
         mStatus.setText("Signed out");
-        Button uploadButton = (Button) findViewById(R.id.open_image_upload_page);
-        uploadButton.setClickable(false);
+
 
         if (imageView != null) {
             ((ViewGroup) imageView.getParent()).removeView(imageView);

@@ -21,6 +21,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.aptdemo.yzhao.androiddemo.R;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -35,17 +37,21 @@ import android.location.Location;
 import com.google.android.gms.location.LocationServices;
 
 
-public class ImageUpload extends ActionBarActivity {
+public class ImageUpload extends ActionBarActivity implements
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private static final int PICK_IMAGE = 1;
     Context context = this;
     private  String stream_id;
     protected MyApplication myApp;
-
+    private String photoCaption;
+    private byte[] encodedImage;
+    private GoogleApiClient geoClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         myApp = (MyApplication)this.getApplication();
         setContentView(R.layout.activity_image_upload);
+        buildGoogleApiClient();
         Bundle extras = getIntent().getExtras();
         stream_id = extras.getString("stream_id");
         // Choose image from library
@@ -63,6 +69,14 @@ public class ImageUpload extends ActionBarActivity {
                     }
                 }
         );
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        geoClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
     }
 
     @Override
@@ -121,31 +135,71 @@ public class ImageUpload extends ActionBarActivity {
                             // Get photo caption
 
                             EditText text = (EditText) findViewById(R.id.upload_message);
-                            String photoCaption = text.getText().toString();
+                            photoCaption = text.getText().toString();
 
                             ByteArrayOutputStream baos = new ByteArrayOutputStream();
                             bitmapImage.compress(Bitmap.CompressFormat.JPEG, 50, baos);
-                            byte[] b = baos.toByteArray();
-                            byte[] encodedImage = Base64.encode(b, Base64.DEFAULT);
-                            String encodedImageStr = encodedImage.toString();
-
-                            getUploadURL(b, photoCaption);
+                            encodedImage = baos.toByteArray();
+                            geoClient.connect();
                         }
                     }
             );
         }
     }
 //
+    @Override
+    public void onConnectionSuspended(int i){
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result){
+
+    }
+
+    @Override
+    public void onConnected(Bundle connectionHint){
+        System.out.println("upload onConnected method called!!!!!!!!!!");
+        String request_url=myApp.back_end+"android/upload_image?stream_id="+stream_id;
+        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                geoClient);
+        if(mLastLocation!=null){
+            String lat = ((Double)mLastLocation.getLatitude()).toString();
+            String lon = ((Double)mLastLocation.getLongitude()).toString();
+            request_url += "&latitude=" + lat;
+            request_url += "&longitude=" + lon;
+        }else{
+            Toast.makeText(context, "Failed to retrieve location", Toast.LENGTH_SHORT).show();
+        }
+        System.out.println(request_url);
+        RequestParams params = new RequestParams();
+        params.put("files",new ByteArrayInputStream(encodedImage));
+        params.put("photoCaption",photoCaption);
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.post(request_url, params, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] response) {
+                Log.w("async", "success!!!!");
+                Toast.makeText(context, "Upload Successful", Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
+                Log.e("Posting_to_blob","There was a problem in retrieving the url : " + e.toString());
+            }
+        });
+    }
+
     private void getUploadURL(final byte[] encodedImage, final String photoCaption){
         AsyncHttpClient httpClient = new AsyncHttpClient();
+
         String request_url=myApp.back_end+"android/upload_image?stream_id="+stream_id;
         Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 myApp.mGoogleApiClient);
         if(mLastLocation!=null){
             String lat = ((Double)mLastLocation.getLatitude()).toString();
             String lon = ((Double)mLastLocation.getLongitude()).toString();
-            request_url += "?latitude=" + lat;
-            request_url += "?longitude=" + lon;
+            request_url += "&latitude=" + lat;
+            request_url += "&longitude=" + lon;
         }else{
             Toast.makeText(context, "Failed to retrieve location", Toast.LENGTH_SHORT).show();
         }
@@ -165,46 +219,9 @@ public class ImageUpload extends ActionBarActivity {
                     Log.e("Posting_to_blob","There was a problem in retrieving the url : " + e.toString());
             }
         });
-//            String upload_url;
-//            @Override
-//            public void onSuccess(int statusCode, Header[] headers, byte[] response) {
-//
-//                try {
-//                    JSONObject jObject = new JSONObject(new String(response));
-//
-//                    upload_url = jObject.getString("upload_url");
-//                    postToServer(encodedImage, photoCaption, upload_url);
-//
-//                }
-//                catch(JSONException j){
-//                    System.out.println("JSON Error");
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
-//                Log.e("Get_serving_url", "There was a problem in retrieving the url : " + e.toString());
-//            }
+
     }
-//
-//    private void postToServer(byte[] encodedImage,String photoCaption, String upload_url){
-//        System.out.println(upload_url);
-//        RequestParams params = new RequestParams();
-//        params.put("file",new ByteArrayInputStream(encodedImage));
-//        params.put("photoCaption",photoCaption);
-//        AsyncHttpClient client = new AsyncHttpClient();
-//        client.post(upload_url, params, new AsyncHttpResponseHandler() {
-//            @Override
-//            public void onSuccess(int statusCode, Header[] headers, byte[] response) {
-//                Log.w("async", "success!!!!");
-//                Toast.makeText(context, "Upload Successful", Toast.LENGTH_SHORT).show();
-//            }
-//            @Override
-//            public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
-//                Log.e("Posting_to_blob","There was a problem in retrieving the url : " + e.toString());
-//            }
-//        });
-//    }
+
 
     public void viewAllImages(View view){
         Intent intent= new Intent(this, DisplayImages.class);
