@@ -10,4 +10,5 @@ import com.google.android.gms.common.api.GoogleApiClient;
 public class MyApplication extends Application {
     public static String userName;
     public static GoogleApiClient mGoogleApiClient;
+    public static String back_end = "http://apt-phase3.appspot.com/";
 }

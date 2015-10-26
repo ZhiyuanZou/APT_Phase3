@@ -31,15 +31,20 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import android.location.Location;
+import com.google.android.gms.location.LocationServices;
 
 
 public class ImageUpload extends ActionBarActivity {
     private static final int PICK_IMAGE = 1;
     Context context = this;
     private  String stream_id;
+    protected MyApplication myApp;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        myApp = (MyApplication)this.getApplication();
         setContentView(R.layout.activity_image_upload);
         Bundle extras = getIntent().getExtras();
         stream_id = extras.getString("stream_id");
@@ -133,7 +138,17 @@ public class ImageUpload extends ActionBarActivity {
 //
     private void getUploadURL(final byte[] encodedImage, final String photoCaption){
         AsyncHttpClient httpClient = new AsyncHttpClient();
-        String request_url="http://aptandroiddemo.appspot.com/android/upload_image?stream_id="+stream_id;
+        String request_url=myApp.back_end+"android/upload_image?stream_id="+stream_id;
+        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                myApp.mGoogleApiClient);
+        if(mLastLocation!=null){
+            String lat = ((Double)mLastLocation.getLatitude()).toString();
+            String lon = ((Double)mLastLocation.getLongitude()).toString();
+            request_url += "?latitude=" + lat;
+            request_url += "?longitude=" + lon;
+        }else{
+            Toast.makeText(context, "Failed to retrieve location", Toast.LENGTH_SHORT).show();
+        }
         System.out.println(request_url);
             RequestParams params = new RequestParams();
             params.put("files",new ByteArrayInputStream(encodedImage));

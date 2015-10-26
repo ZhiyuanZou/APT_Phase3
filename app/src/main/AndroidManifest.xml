@@ -9,6 +9,9 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
 
     <application
         android:name="com.aptPhase3.zhiyuan.android.MyApplication"
@@ -41,6 +44,10 @@
         <activity
             android:name="com.aptPhase3.zhiyuan.android.ViewAStreamActivity"
             android:label="@string/title_activity_view_astream" >
+        </activity>
+        <activity
+            android:name="com.aptPhase3.zhiyuan.android.TakePhotoActivity"
+            android:label="@string/title_activity_take_photo" >
         </activity>
     </application>
 

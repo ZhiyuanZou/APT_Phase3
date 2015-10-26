@@ -39,6 +39,9 @@ public class ViewAStreamActivity extends ActionBarActivity implements Connection
     private String TAG  = "Display Images";
     protected MyApplication myApp;
     private String stream_id;
+    private Button uploadButton;
+    private Button takePhotoButton;
+    private View.OnClickListener listener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,9 +50,14 @@ public class ViewAStreamActivity extends ActionBarActivity implements Connection
         Bundle extras = getIntent().getExtras();
         stream_id = extras.getString("stream_id");
         // set clickable
-        Button uploadButton = (Button) findViewById(R.id.upload_button);
-        System.out.println("!!!!!!!!!!"+uploadButton);
-        uploadButton.setClickable(true);
+        uploadButton = (Button) findViewById(R.id.upload_button);
+
+        uploadButton.setVisibility(View.INVISIBLE);
+        listener = this;
+        // for taking picture
+        takePhotoButton = (Button) findViewById(R.id.TakePhotoButton);
+        takePhotoButton.setVisibility(View.INVISIBLE);
+
 
         final String request_url = "http://apt-phase3.appspot.com/android/view_single_stream?user_id="+myApp.userName+"&stream_id="+stream_id;
         AsyncHttpClient httpClient = new AsyncHttpClient();
@@ -60,7 +68,18 @@ public class ViewAStreamActivity extends ActionBarActivity implements Connection
                 final ArrayList<String> imageCaps = new ArrayList<String>();
                 try {
                     JSONObject jObject = new JSONObject(new String(response));
-//                    System.out.println(jObject.toString());
+                    System.out.println(jObject.toString());
+                    if (jObject.getBoolean("myOwn")){
+                        uploadButton.setOnClickListener(listener);
+                        uploadButton.setVisibility(View.VISIBLE);
+                        uploadButton.setEnabled(true);
+                        uploadButton.setClickable(true);
+
+                        takePhotoButton.setOnClickListener(listener);
+                        takePhotoButton.setVisibility(View.VISIBLE);
+                        takePhotoButton.setEnabled(true);
+                        takePhotoButton.setClickable(true);
+                    }
                     JSONArray displayImages = jObject.getJSONArray("displayImages");
 //                    JSONArray displayCaption = jObject.getJSONArray("imageCaptionList");
                     for(int i=0;i<displayImages.length();i++) {
@@ -68,7 +87,7 @@ public class ViewAStreamActivity extends ActionBarActivity implements Connection
                         String tmp = singleImage.getString("url");
                         imageURLs.add(tmp);
 //                        imageCaps.add(displayCaption.getString(i));
-//                        System.out.println(displayImages.getString(i));
+                        System.out.println(displayImages.getString(i));
                     }
                     GridView gridview = (GridView) findViewById(R.id.gridview);
                     gridview.setAdapter(new ImageAdapter(context,imageURLs));
@@ -141,6 +160,12 @@ public class ViewAStreamActivity extends ActionBarActivity implements Connection
                     Intent intent = new Intent(context, ImageUpload.class);
                     intent.putExtra("stream_id", stream_id);
                     startActivity(intent);
+                    break;
+                case R.id.TakePhotoButton:
+                    System.out.println("take_photo_button_clicked");
+                    Intent photoIntent = new Intent(context, TakePhotoActivity.class);
+                    photoIntent.putExtra("stream_id", stream_id);
+                    startActivity(photoIntent);
                     break;
             }
     }

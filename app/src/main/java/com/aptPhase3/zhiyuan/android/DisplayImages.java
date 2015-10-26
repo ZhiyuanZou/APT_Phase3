@@ -37,7 +37,7 @@ public class DisplayImages extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_images);
         myApp = (MyApplication)this.getApplication();
-        final String request_url = "http://apt-phase3.appspot.com/android/view_all_streams?user_id="+myApp.userName;
+        final String request_url = myApp.back_end+"android/view_all_streams?user_id="+myApp.userName;
         AsyncHttpClient httpClient = new AsyncHttpClient();
         httpClient.get(request_url, new AsyncHttpResponseHandler() {
             @Override

@@ -24,6 +24,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.google.android.gms.location.LocationServices;
+
 
 public class Homepage extends ActionBarActivity implements
         ConnectionCallbacks, OnConnectionFailedListener, View.OnClickListener {
@@ -136,6 +138,7 @@ public class Homepage extends ActionBarActivity implements
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Plus.API, Plus.PlusOptions.builder().build())
+                .addApi(LocationServices.API)
                 .addScope(Plus.SCOPE_PLUS_LOGIN)
                 .build();
     }
