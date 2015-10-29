@@ -14,36 +14,37 @@
         android:layout_width="fill_parent" android:layout_height="238dp"
 
         android:focusable="false"
-        android:focusableInTouchMode="true">
+        android:focusableInTouchMode="true"
+        android:layout_weight="0.83">
 
     </SurfaceView>
 
-    <ImageView
-        android:layout_width="311dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/imageView"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="0.99" />
-
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="237dp"
+        android:layout_width="351dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal">
+        android:layout_gravity="center_horizontal|left">
 
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="84dp"
             android:layout_height="wrap_content"
             android:text="Use this Picture"
-            android:id="@+id/submite_button" />
+            android:id="@+id/submite_button"
+            android:layout_gravity="left" />
 
         <Button
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:text="Take Photo"
             android:id="@+id/Take_Pic_Button"
             android:layout_gravity="center_horizontal" />
+
+        <ImageView
+            android:layout_width="73dp"
+            android:layout_height="73dp"
+            android:id="@+id/imageView"
+            android:layout_gravity="center_horizontal|right" />
     </LinearLayout>
 
 </LinearLayout>

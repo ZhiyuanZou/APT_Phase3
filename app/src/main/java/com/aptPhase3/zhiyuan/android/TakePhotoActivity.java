@@ -1,5 +1,6 @@
 package com.aptPhase3.zhiyuan.android;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -9,10 +10,13 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import com.aptdemo.yzhao.androiddemo.R;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.squareup.picasso.Picasso;
 
 import android.hardware.Camera;
 
@@ -21,6 +25,7 @@ import java.io.IOException;
 import java.util.List;
 import android.hardware.Camera.PictureCallback;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import java.io.File;
 import android.os.Environment;
@@ -32,10 +37,12 @@ import android.graphics.Bitmap;
 import android.widget.ImageView;
 import android.app.Activity;
 import android.widget.Toast;
-
+import android.graphics.Matrix;
+import java.io.ByteArrayOutputStream;
 import org.apache.http.Header;
 
-public class TakePhotoActivity extends ActionBarActivity implements SurfaceHolder.Callback, PictureCallback, View.OnClickListener{
+public class TakePhotoActivity extends ActionBarActivity implements SurfaceHolder.Callback, PictureCallback, View.OnClickListener
+        ,GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener{
 
     Context context = this;
     private SurfaceView mSurfaceView;
@@ -51,6 +58,7 @@ public class TakePhotoActivity extends ActionBarActivity implements SurfaceHolde
     private String streamId;
     private byte[] mImage;
     protected MyApplication myApp;
+    private GoogleApiClient geoClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +72,9 @@ public class TakePhotoActivity extends ActionBarActivity implements SurfaceHolde
         mImageView = (ImageView) findViewById(R.id.imageView);
         mImageView.setVisibility(View.VISIBLE);
         listener = this;
+
+        //for geo
+        buildGoogleApiClient();
 
         // for taking picture
         takePhotoButton = (Button) findViewById(R.id.Take_Pic_Button);
@@ -87,6 +98,23 @@ public class TakePhotoActivity extends ActionBarActivity implements SurfaceHolde
         System.out.println("take photo created!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     }
 
+    protected synchronized void buildGoogleApiClient() {
+        geoClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i){
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result){
+
+    }
 
     @Override
     public void onClick(View v) {
@@ -97,16 +125,33 @@ public class TakePhotoActivity extends ActionBarActivity implements SurfaceHolde
                 mCamera.takePicture(null,null,this);
                 break;
             case R.id.submite_button:
-                uploadImage();
-
+                geoClient.connect();
+                break;
+            case R.id.imageView:
+                System.out.println("imageView clicked");
+                showImage();
+                break;
         }
     }
 
-    public void uploadImage(){
+    public void showImage(){
+        System.out.println("showImage called");
+        Dialog imageDialog = new Dialog(context);
+        imageDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        imageDialog.setContentView(R.layout.thumbnail);
+        ImageView image = (ImageView) imageDialog.findViewById(R.id.thumbnail_IMAGEVIEW);
+
+        Picasso.with(context).load(mCurrentPhotoPath).into(image);
+
+        imageDialog.show();
+    }
+
+    @Override
+    public void onConnected(Bundle connectionHint){
         AsyncHttpClient httpClient = new AsyncHttpClient();
         String request_url=myApp.back_end+"android/upload_image?stream_id="+streamId;
         Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                myApp.mGoogleApiClient);
+                geoClient);
         if(mLastLocation!=null){
             String lat = ((Double)mLastLocation.getLatitude()).toString();
             String lon = ((Double)mLastLocation.getLongitude()).toString();
@@ -154,9 +199,21 @@ public class TakePhotoActivity extends ActionBarActivity implements SurfaceHolde
 //        }
 //    }
 
+    public Bitmap rotaingImageView(int angle , Bitmap bitmap) {
+        //旋转图片 动作
+        Matrix matrix = new Matrix();;
+        matrix.postRotate(angle);
+        System.out.println("angle2=" + angle);
+        // 创建新的图片
+        Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0,
+                bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        return resizedBitmap;
+    }
+
     public void surfaceCreated(SurfaceHolder holder) {
 
         mCamera = Camera.open();
+        mCamera.setDisplayOrientation(90);
     }
        //  mCamera is an Object of the class “Camera”. In the surfaceCreated we “open” the camera. This is how to start it!!
 
@@ -173,7 +230,7 @@ public class TakePhotoActivity extends ActionBarActivity implements SurfaceHolde
             // You need to choose the most appropriate previewSize for your app
             Camera.Size previewSize = previewSizes.get(0);
 
-                    parameters.setPreviewSize(previewSize.width, previewSize.height);
+            parameters.setPreviewSize(previewSize.width, previewSize.height);
             mCamera.setParameters(parameters);
             mCamera.startPreview();
 
@@ -210,15 +267,23 @@ public class TakePhotoActivity extends ActionBarActivity implements SurfaceHolde
         }
 
         if (data != null) {
-            mImage = data;
+            
             submitButton.setClickable(true);
             submitButton.setEnabled(true);
+            mImageView.setClickable(true);
+            mImageView.setOnClickListener(this);
+            mImageView.setEnabled(true);
             Bitmap m_bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+//            rotateImage(m_bitmap);
             if (m_bitmap != null) {
                 try{
                     FileOutputStream m_out = new FileOutputStream(photo);
+                    m_bitmap = rotaingImageView(90,m_bitmap);
                     m_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, m_out);
                     mImageView.setImageBitmap(m_bitmap);
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    m_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    mImage = stream.toByteArray();
                 }catch(IOException e){
                     System.out.println("Exception in filecreation");
                 }

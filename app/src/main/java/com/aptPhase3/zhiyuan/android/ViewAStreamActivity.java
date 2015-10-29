@@ -170,6 +170,8 @@ public class ViewAStreamActivity extends ActionBarActivity implements Connection
             }
     }
 
+
+
     @Override
     public void onConnectionSuspended(int cause) {
         // The connection to Google Play services was lost for some reason.

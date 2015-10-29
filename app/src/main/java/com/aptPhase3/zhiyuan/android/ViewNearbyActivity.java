@@ -81,15 +81,17 @@ public class ViewNearbyActivity extends ActionBarActivity
                 try {
                     JSONObject jObject = new JSONObject(new String(response));
                     JSONArray displayImages = jObject.getJSONArray("displayImages");
-                    JSONArray displayStreamId = jObject.getJSONArray("streamId");
-                    for(int i=0;i<displayImages.length();i++) {
-
-                        imageURLs.add(displayImages.getString(i));
-                        allStreamId.add(displayStreamId.getString(i));
+//                    JSONArray displayStreamId = jObject.getJSONArray("streamId");
+                    for (int i = 0; i < displayImages.length(); i++) {
+                        JSONObject singleImage = new JSONObject(displayImages.getString(i));
+                        imageURLs.add(singleImage.getString("url"));
+                        allStreamId.add(singleImage.getString("stream_id"));
+//                        imageURLs.add(displayImages.getString(i));
+//                        allStreamId.add(displayStreamId.getString(i));
 //                        System.out.println(displayImages.getString(i));
                     }
                     GridView gridview = (GridView) findViewById(R.id.gridview);
-                    gridview.setAdapter(new ImageAdapter(context,imageURLs));
+                    gridview.setAdapter(new ImageAdapter(context, imageURLs));
                     gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View v,
@@ -107,12 +109,11 @@ public class ViewNearbyActivity extends ActionBarActivity
 //                            imageDialog.show();
                             String stream_id = allStreamId.get(position);
                             Intent i = new Intent(getApplicationContext(), ViewAStreamActivity.class);
-                            i.putExtra("stream_id",stream_id);
+                            i.putExtra("stream_id", stream_id);
                             startActivity(i);
                         }
                     });
-                }
-                catch(JSONException j){
+                } catch (JSONException j) {
                     System.out.println("JSON Error");
                 }
 
