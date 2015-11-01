@@ -12,7 +12,8 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import com.aptdemo.yzhao.androiddemo.R;
+//import com.aptdemo.yzhao.androiddemo.R;
+import com.aptPhase3.zhiyuan.android.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;

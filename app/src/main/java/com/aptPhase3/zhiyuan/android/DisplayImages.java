@@ -15,7 +15,8 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.aptdemo.yzhao.androiddemo.R;
+//import com.aptdemo.yzhao.androiddemo.R;
+import com.aptPhase3.zhiyuan.android.R;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.squareup.picasso.Picasso;

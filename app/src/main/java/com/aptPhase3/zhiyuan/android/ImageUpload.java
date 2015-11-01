@@ -20,7 +20,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.aptdemo.yzhao.androiddemo.R;
+//import com.aptdemo.yzhao.androiddemo.R;
+import com.aptPhase3.zhiyuan.android.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.loopj.android.http.AsyncHttpClient;
@@ -30,7 +31,7 @@ import com.loopj.android.http.RequestParams;
 import org.apache.http.Header;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import com.aptPhase3.zhiyuan.android.R;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import android.location.Location;

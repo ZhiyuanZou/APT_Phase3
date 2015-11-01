@@ -1,6 +1,7 @@
 package com.aptPhase3.zhiyuan.android;
 
-import com.aptdemo.yzhao.androiddemo.R;
+//import com.aptdemo.yzhao.androiddemo.R;
+import com.aptPhase3.zhiyuan.android.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
